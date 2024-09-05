@@ -3,13 +3,14 @@ import { Renderer as CanvasRenderer } from '@antv/g-canvas';
 import { Plugin as DragAndDropPlugin } from '@antv/g-plugin-dragndrop';
 import { Renderer as SVGRenderer } from '@antv/g-svg';
 import { Renderer as WebGLRenderer } from '@antv/g-webgl';
-import { stdlib, render } from '../src';
+import { stdlib, render, Chart } from '../src';
 import { renderToMountedElement } from './utils/renderToMountedElement';
 import * as statics from './plots/static';
 import * as interactions from './plots/interaction';
 import * as animations from './plots/animation';
 import * as tooltips from './plots/tooltip';
 import * as apis from './plots/api';
+import * as bugfix from './plots/bugfix';
 
 const tests = {
   ...createSpecRender(namespace(statics, 'static')),
@@ -17,6 +18,7 @@ const tests = {
   ...createSpecRender(namespace(interactions, 'interaction')),
   ...createSpecRender(namespace(animations, 'animation')),
   ...createAPIRender(namespace(apis, 'api')),
+  ...createAPIRender(namespace(bugfix, 'bugfix')),
 };
 
 const renderers = {
@@ -80,6 +82,14 @@ selectRenderer.onchange = () => {
   plot();
 };
 
+// Select for renderer mode(Spec | API).
+const selectMode = document.createElement('select');
+selectMode.style.margin = '1em';
+selectMode.append(...['Spec', 'API'].map(createOption));
+selectMode.onchange = () => {
+  plot();
+};
+
 // Search input
 const searchInput = document.createElement('input');
 searchInput.style.margin = '1em';
@@ -106,6 +116,7 @@ if (tests[initialValue]) selectChart.value = initialValue;
 app.append(selectChart);
 app.append(searchInput);
 app.append(selectRenderer);
+app.append(selectMode);
 app.append(span);
 plot();
 
@@ -149,27 +160,42 @@ function createSpecRender(object) {
       renderer.registerPlugin(
         new DragAndDropPlugin({ dragstartDistanceThreshold: 1 }),
       );
-      canvas = new Canvas({
-        container: document.createElement('div'),
-        width,
-        height,
-        renderer,
-      });
+      const mode = selectMode.value;
+      if (mode === 'API') {
+        const div = document.createElement('div');
+        const chart = new Chart({
+          container: div,
+          width,
+          height,
+          autoFit: false,
+          renderer,
+        });
+        chart.options(options);
+        chart.render();
+        container.append(div);
+      } else {
+        canvas = new Canvas({
+          container: document.createElement('div'),
+          width,
+          height,
+          renderer,
+        });
 
-      // @ts-ignore
-      window.__g_instances__ = [canvas];
-      const renderChart = mounted ? renderToMountedElement : render;
-      before?.();
-      const node = renderChart(
-        options,
         // @ts-ignore
-        { canvas, library: stdlib() },
-        () => after?.(),
-      );
+        window.__g_instances__ = [canvas];
+        const renderChart = mounted ? renderToMountedElement : render;
+        before?.();
+        const node = renderChart(
+          options,
+          // @ts-ignore
+          { canvas, library: stdlib() },
+          () => after?.(),
+        );
 
-      // Append nodes.
-      if (node instanceof HTMLElement) container.append(node);
-      if (dom instanceof HTMLElement) container.append(dom);
+        // Append nodes.
+        if (node instanceof HTMLElement) container.append(node);
+        if (dom instanceof HTMLElement) container.append(dom);
+      }
     };
   };
   return Object.fromEntries(
