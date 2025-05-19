@@ -8,6 +8,7 @@ import {
   Theta,
   Radial,
   Radar,
+  Helix,
 } from '../../../src/coordinate';
 import { Constant, Field, Transform, Column } from '../../../src/encode';
 import {
@@ -156,6 +157,7 @@ import {
   KDE,
   Log as DataLog,
   WordCloud,
+  EMA,
 } from '../../../src/data';
 import {
   OverflowHide,
@@ -182,6 +184,7 @@ describe('corelib', () => {
       'data.join': Join,
       'data.kde': KDE,
       'data.log': DataLog,
+      'data.ema': EMA,
       'data.wordCloud': WordCloud,
       'transform.stackY': StackY,
       'transform.binX': BinX,
@@ -216,6 +219,7 @@ describe('corelib', () => {
       'coordinate.radar': Radar,
       'coordinate.fisheye': Fisheye,
       'coordinate.radial': Radial,
+      'coordinate.helix': Helix,
       'encode.constant': Constant,
       'encode.field': Field,
       'encode.transform': Transform,

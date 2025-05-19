@@ -1,18 +1,21 @@
 import { DisplayObject } from '@antv/g';
-import { group } from 'd3-array';
+import { group } from '@antv/vendor/d3-array';
 import { deepMix } from '@antv/util';
 import { subObject } from '../utils/helper';
 import {
   createValueof,
   createDatumof,
   selectG2Elements,
-  useState,
   renderLink,
   renderBackground,
   selectPlotArea,
   offsetTransform,
   mergeState,
   selectElementByData,
+  createXKey,
+  createFindElementByEvent,
+  VALID_FIND_BY_X_MARKS,
+  createUseState,
 } from './utils';
 
 /**
@@ -24,19 +27,32 @@ export function elementSelect(
     elements: elementsof, // given the root of chart returns elements to be manipulated
     datum, // given each element returns the datum of it
     groupKey = (d) => d, // group elements by specified key
+    regionGroupKey = (d) => d, // how to group elements when click region
     link = false, // draw link or not
     single = false, // single select or not
+    multipleSelectHotkey, // hotkey for multi-select mode
     coordinate,
     background = false,
     scale,
     emitter,
     state = {},
+    region = false,
+    regionEleFilter = (el) => VALID_FIND_BY_X_MARKS.includes(el.markType),
   }: Record<string, any>,
 ) {
   const elements = elementsof(root);
   const elementSet = new Set(elements);
+  const findElement = createFindElementByEvent({
+    elementsof,
+    root,
+    coordinate,
+    scale,
+  });
   const keyGroup = group(elements, groupKey);
+  const regionGroup = group(elements, regionGroupKey);
+
   const valueof = createValueof(elements, datum);
+
   const [appendLink, removeLink] = renderLink({
     link,
     elements,
@@ -57,7 +73,7 @@ export function elementSelect(
   const elementStyle = deepMix(state, {
     selected: {
       ...(state.selected?.offset && {
-        //Apply translate to mock slice out.
+        // Apply translate to mock slice out.
         transform: (...params) => {
           const value = state.selected.offset(...params);
           const [, i] = params;
@@ -67,7 +83,11 @@ export function elementSelect(
     },
   });
 
-  const { setState, removeState, hasState } = useState(elementStyle, valueof);
+  const useState = createUseState(elementStyle, elements);
+
+  const { updateState, removeState, hasState } = useState(valueof);
+  let isMultiSelectMode = !single; // "single" determines whether to multi-select by default
+  let activeHotkey = null; // Track the currently active hotkey
 
   const clear = (nativeEvent = true) => {
     for (const e of elements) {
@@ -79,17 +99,25 @@ export function elementSelect(
     return;
   };
 
-  const singleSelect = (event, element, nativeEvent = true) => {
+  const singleSelect = ({
+    event,
+    element,
+    nativeEvent = true,
+    filter = (el) => true,
+    groupBy = groupKey,
+    groupMap = keyGroup,
+  }) => {
+    const filteredElements = elements.filter(filter);
     // Clear states if clicked selected element.
     if (hasState(element, 'selected')) clear();
     else {
-      const k = groupKey(element);
-      const group = keyGroup.get(k);
+      const k = groupBy(element);
+      const group = groupMap.get(k);
       const groupSet = new Set(group);
-      for (const e of elements) {
-        if (groupSet.has(e)) setState(e, 'selected');
+      for (const e of filteredElements) {
+        if (groupSet.has(e)) updateState(e, 'selected');
         else {
-          setState(e, 'unselected');
+          updateState(e, 'unselected');
           removeLink(e);
         }
         if (e !== element) removeBackground(e);
@@ -108,15 +136,24 @@ export function elementSelect(
     }
   };
 
-  const multipleSelect = (event, element, nativeEvent = true) => {
-    const k = groupKey(element);
-    const group = keyGroup.get(k);
+  const multipleSelect = ({
+    event,
+    element,
+    nativeEvent = true,
+    filter = (el) => true,
+    groupBy = groupKey,
+    groupMap = keyGroup,
+  }) => {
+    const k = groupBy(element);
+    const group = groupMap.get(k);
     const groupSet = new Set(group);
+    const filteredElements = elements.filter(filter);
+
     if (!hasState(element, 'selected')) {
       const hasSelectedGroup = group.some((e) => hasState(e, 'selected'));
-      for (const e of elements) {
-        if (groupSet.has(e)) setState(e, 'selected');
-        else if (!hasState(e, 'selected')) setState(e, 'unselected');
+      for (const e of filteredElements) {
+        if (groupSet.has(e)) updateState(e, 'selected');
+        else if (!hasState(e, 'selected')) updateState(e, 'unselected');
       }
       // Append link for each group only once.
       if (!hasSelectedGroup && link) appendLink(group);
@@ -131,7 +168,7 @@ export function elementSelect(
       // If there are still some selected elements after resetting this group,
       // only remove the link.
       for (const e of group) {
-        setState(e, 'unselected');
+        updateState(e, 'unselected');
         removeLink(e);
         removeBackground(e);
       }
@@ -148,19 +185,63 @@ export function elementSelect(
 
   const click = (event) => {
     const { target: element, nativeEvent = true } = event;
-    // Click non-element shape, reset.
-    // Such as the rest of content area(background).
-    if (!elementSet.has(element)) return clear();
-    if (single) return singleSelect(event, element, nativeEvent);
-    return multipleSelect(event, element, nativeEvent);
+
+    const select = !isMultiSelectMode ? singleSelect : multipleSelect;
+    let el = element;
+    const isClickElement = elementSet.has(element);
+
+    if (!region || isClickElement) {
+      // Click non-element shape, reset.
+      // Such as the rest of content area(background).
+      if (!isClickElement) return clear();
+      return select({ event, element: el, nativeEvent, groupBy: groupKey });
+    } else {
+      // Click background region area, select elements in the region.
+      // Get element at cursor.x position.
+      el = findElement(event);
+
+      if (!elementSet.has(el)) return clear();
+
+      return select({
+        event,
+        element: el,
+        nativeEvent,
+        filter: regionEleFilter,
+        groupBy: regionGroupKey,
+        groupMap: regionGroup,
+      });
+    }
+  };
+
+  // Handle keyboard events for multi-select mode
+  const hotkeys = Array.isArray(multipleSelectHotkey)
+    ? multipleSelectHotkey
+    : [multipleSelectHotkey];
+  const handleKeyDown = (event) => {
+    if (hotkeys.includes(event.code) && !activeHotkey) {
+      activeHotkey = event.code;
+      isMultiSelectMode = true;
+    }
+  };
+  const handleKeyUp = (event) => {
+    if (event.code === activeHotkey) {
+      activeHotkey = null;
+      isMultiSelectMode = false;
+    }
   };
 
   root.addEventListener('click', click);
+  if (multipleSelectHotkey) {
+    // If a hotkey is set, the initial state should be single mode
+    isMultiSelectMode = false;
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+  }
 
   const onSelect = (e) => {
     const { nativeEvent, data } = e;
     if (nativeEvent) return;
-    const selectedData = single ? data.data.slice(0, 1) : data.data;
+    const selectedData = !isMultiSelectMode ? data.data.slice(0, 1) : data.data;
     for (const d of selectedData) {
       const element = selectElementByData(elements, d, datum);
       click({ target: element, nativeEvent: false });
@@ -177,6 +258,10 @@ export function elementSelect(
   return () => {
     for (const e of elements) removeLink(e);
     root.removeEventListener('click', click);
+    if (multipleSelectHotkey) {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
+    }
     emitter.off('element:select', onSelect);
     emitter.off('element:unselect', onUnSelect);
   };
@@ -184,6 +269,7 @@ export function elementSelect(
 
 export function ElementSelect({
   createGroup,
+  createRegionGroup,
   background = false,
   link = false,
   ...rest
@@ -196,6 +282,9 @@ export function ElementSelect({
       elements: selectG2Elements,
       datum: createDatumof(view),
       groupKey: createGroup ? createGroup(view) : undefined,
+      regionGroupKey: createRegionGroup
+        ? createRegionGroup(view)
+        : createXKey(view),
       coordinate,
       scale,
       state: mergeState(options, [

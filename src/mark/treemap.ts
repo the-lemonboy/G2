@@ -56,6 +56,7 @@ const DEFAULT_LABEL_OPTIONS = {
   wordWrap: true,
   maxLines: 1,
   wordWrapWidth: (d) => d.x1 - d.x0,
+  isTreemapLabel: true,
 };
 
 const DEFAULT_TOOLTIP_OPTIONS = {
@@ -122,6 +123,7 @@ export const Treemap: CC<TreemapOptions> = (options, context) => {
         {
           ...DEFAULT_LABEL_OPTIONS,
           ...labelStyle,
+          ...(treemapDrillDown && { cursor: 'pointer' }),
         },
         ...labels,
       ],

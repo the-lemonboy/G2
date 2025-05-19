@@ -1,6 +1,6 @@
 import { DisplayObject, Path, AABB } from '@antv/g';
-import { path as d3Path } from 'd3-path';
-import { sort } from 'd3-array';
+import { path as d3Path } from '@antv/vendor/d3-path';
+import { sort, bisector } from '@antv/vendor/d3-array';
 import { Vector2 } from '@antv/coord';
 import { filter } from '@antv/util';
 import type { PathArray } from '@antv/util';
@@ -119,26 +119,103 @@ export function createDatumof(view: G2ViewDescriptor | G2ViewDescriptor[]) {
  * { selectedFill, selectedStroke } is for selected state.
  * { unselectedFill, unselectedStroke } is for unselected state.
  */
-export function useState(
+
+/**
+ * Define state priorities, higher number means higher priority.
+ */
+const STATE_PRIORITIES = {
+  selected: 3,
+  unselected: 3,
+  active: 2,
+  inactive: 2,
+  default: 1,
+};
+
+/**
+ * Define state groups, states in the same group are mutually exclusive.
+ */
+const STATE_GROUPS = {
+  selection: ['selected', 'unselected'],
+  highlight: ['active', 'inactive'],
+};
+
+export function createUseState(
   style: Record<string, any>,
+  elements: Element[],
+) {
+  // Apply interaction style to all elements.
+  elements.forEach((element) => {
+    // @ts-ignore
+    const currentStyle = element.__interactionStyle__;
+
+    if (currentStyle) {
+      // @ts-ignore
+      element.__interactionStyle__ = { ...currentStyle, ...style };
+    } else {
+      // @ts-ignore
+      element.__interactionStyle__ = style;
+    }
+  });
+
+  return (
+    valueof = (d, element) => d,
+    setAttribute = (element, key, v) => element.setAttribute(key, v),
+  ) => useState(undefined, valueof, setAttribute);
+}
+
+export function useState(
+  style: Record<string, any> | undefined,
   valueof = (d, element) => d,
   setAttribute = (element, key, v) => element.setAttribute(key, v),
 ) {
   const STATES = '__states__';
   const ORIGINAL = '__ordinal__';
 
+  // Get state priority.
+  const getStatePriority = (stateName) =>
+    STATE_PRIORITIES[stateName] || STATE_PRIORITIES.default;
+
+  // Get the group that a state belongs to.
+  const getStateGroup = (stateName) => {
+    return Object.entries(STATE_GROUPS).find(([_, states]) =>
+      states.includes(stateName),
+    )?.[0];
+  };
+
   // Mix style for each state and apply it to element.
-  const updateState = (element) => {
+  const applyState = (element) => {
     const { [STATES]: states = [], [ORIGINAL]: original = {} } = element;
-    const stateStyle = states.reduce(
-      (mixedStyle, state) => ({
-        ...mixedStyle,
-        ...style[state],
-      }),
-      original,
+
+    // Sort states by priority.
+    const sortedStates = [...states].sort(
+      (a, b) => getStatePriority(b) - getStatePriority(a),
     );
-    if (Object.keys(stateStyle).length === 0) return;
-    for (const [key, value] of Object.entries(stateStyle)) {
+
+    // Create a Map to track the highest priority state for each style attribute.
+    const styleAttributeMap = new Map();
+
+    // Iterate through all states to find the highest priority state for each style attribute.
+    for (const state of sortedStates) {
+      // If style exists, use it directly, else use interaction style on element.
+      const stateStyles =
+        (style ?? element.__interactionStyle__)?.[state] || {};
+      for (const [key, value] of Object.entries(stateStyles)) {
+        if (!styleAttributeMap.has(key)) {
+          styleAttributeMap.set(key, value);
+        }
+      }
+    }
+
+    // Apply styles including original styles.
+    const finalStyle = { ...original };
+    for (const [key, value] of styleAttributeMap.entries()) {
+      finalStyle[key] = value;
+    }
+
+    if (Object.keys(finalStyle).length === 0) return;
+
+    // Apply final styles to the element.
+    for (const [key, value] of Object.entries(finalStyle)) {
       const currentValue = getStyle(element, key);
       const v = valueof(value, element);
       setAttribute(element, key, v);
@@ -155,12 +232,35 @@ export function useState(
   };
 
   /**
+   * Update states and update element, handle conflict states automatically.
+   */
+  const updateState = (element, ...states) => {
+    initState(element);
+    const currentStates = element[STATES];
+
+    // Collect all new state groups.
+    const newStateGroups = new Set(
+      states
+        .map((state) => getStateGroup(state))
+        .filter((group) => group !== undefined),
+    );
+
+    // Exclude old states that are in the new state group.
+    const remainingStates = currentStates.filter(
+      (existingState) => !newStateGroups.has(getStateGroup(existingState)),
+    );
+
+    element[STATES] = [...remainingStates, ...states];
+    applyState(element);
+  };
+
+  /**
    * Set the states and update element.
    */
   const setState = (element, ...states) => {
     initState(element);
     element[STATES] = [...states];
-    updateState(element);
+    applyState(element);
   };
 
   /**
@@ -174,7 +274,7 @@ export function useState(
         element[STATES].splice(index, 1);
       }
     }
-    updateState(element);
+    applyState(element);
   };
 
   const hasState = (element, state) => {
@@ -184,6 +284,7 @@ export function useState(
 
   return {
     setState,
+    updateState,
     removeState,
     hasState,
   };
@@ -531,4 +632,63 @@ export function maybeRoot(node, rootOf) {
   let root = node.parent;
   while (root && !rootOf(root)) root = root.parent;
   return root;
+}
+
+export const VALID_FIND_BY_X_MARKS = ['interval', 'point', 'density'];
+/**
+ * @description Create function that can find element by event.
+ * @returns Element find function.
+ */
+export function createFindElementByEvent({
+  elementsof,
+  root,
+  coordinate,
+  scale,
+  validFindByXMarks = VALID_FIND_BY_X_MARKS,
+}) {
+  let elements = elementsof(root);
+  const getValidFindByXMarks = (d) => validFindByXMarks.includes(d.markType);
+  const hasValidFindByXMarks = elements.find(getValidFindByXMarks);
+
+  // Try to find element by x position.
+  if (hasValidFindByXMarks) {
+    elements = elements.filter(getValidFindByXMarks);
+
+    const scaleX = scale.x;
+    const scaleSeries = scale.series;
+    const bandWidth = scaleX?.getBandWidth?.() ?? 0;
+    const xof = scaleSeries
+      ? (d) => {
+          const seriesCount = Math.round(1 / scaleSeries.valueBandWidth);
+          return (
+            d.__data__.x +
+            d.__data__.series * bandWidth +
+            bandWidth / (seriesCount * 2)
+          );
+        }
+      : (d) => d.__data__.x + bandWidth / 2;
+
+    // Sort for bisector search.
+    elements.sort((a, b) => xof(a) - xof(b));
+
+    return (event) => {
+      const mouse = mousePosition(root, event);
+      if (!mouse) return;
+      const [abstractX] = coordinate.invert(mouse);
+      const search = bisector(xof).center;
+      const i = search(elements, abstractX);
+      const target = elements[i];
+
+      return target;
+    };
+  }
+
+  // If there is no valid element find by x, just return the target element.
+  return (event) => {
+    const { target } = event;
+    return maybeRoot(target, (node) => {
+      if (!node.classList) return false;
+      return node.classList.includes('element');
+    });
+  };
 }

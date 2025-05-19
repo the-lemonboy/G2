@@ -1,5 +1,5 @@
 import { DisplayObject } from '@antv/g';
-import { maxIndex } from 'd3-array';
+import { maxIndex } from '@antv/vendor/d3-array';
 import { ContrastReverseLabelTransform } from '../spec';
 import { LabelTransformComponent as LLC } from '../runtime';
 import { parseToRGB } from '../utils/color';
@@ -25,6 +25,7 @@ function getL(r: number, g: number, b: number) {
  * @param background
  */
 function contrast(foreground, background): number {
+  if (!foreground || !background || foreground === background) return 1;
   const { r, g, b } = foreground;
   const { r: rb, g: gb, b: bb } = background;
   const L1 = getL(r, g, b);

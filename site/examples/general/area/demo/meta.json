@@ -34,7 +34,7 @@
         "zh": "数据缺失面积图",
         "en": "Missing Data Area Chart"
       },
-      "screenshot": "https://mdn.alipayobjects.com/huamei_qa8qxu/afts/img/A*ox-rS7bQE48AAAAAAAAAAAAADmJ7AQ/original"
+      "screenshot": "https://mdn.alipayobjects.com/huamei_qa8qxu/afts/img/A*7XNGTZ7WttIAAAAAAAAAAAAAemJ7AQ/original"
     },
     {
       "filename": "area-with-negative.ts",
@@ -147,6 +147,14 @@
         "en": "Range Spline Area Chart"
       },
       "screenshot": "https://mdn.alipayobjects.com/huamei_qa8qxu/afts/img/A*ln0-RKKu520AAAAAAAAAAAAADmJ7AQ/original"
+    },
+    {
+      "filename": "rank-trend-area.ts",
+      "title": {
+        "zh": "排名趋势面积图",
+        "en": "Rank Trend Area Chart"
+      },
+      "screenshot": "https://mdn.alipayobjects.com/huamei_qa8qxu/afts/img/A*d-KvQquoIlAAAAAAAAAAAAAAemJ7AQ/original"
     }
   ]
 }

@@ -73,9 +73,11 @@ export class Runtime<Spec extends G2Spec = G2Spec> extends CompositionNode {
   render(): Promise<Runtime<Spec>> {
     if (this._rendering) return this._addToTrailing();
     if (!this._context.canvas) this._createCanvas();
-    this._context.canvas.getConfig().supportsCSSTransform = true;
     this._bindAutoFit();
     this._rendering = true;
+
+    // @fixme The cancel render is not marked, which will cause additional rendered event.
+    // @ref src/runtime/render.ts
     const finished = new Promise<Runtime<Spec>>((resolve, reject) =>
       render(
         this._computedOptions(),

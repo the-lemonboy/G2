@@ -1,3 +1,138 @@
+## [5.3.2](https://github.com/antvis/g2/compare/5.3.1...5.3.2) (2025-04-21)
+
+
+
+## [5.3.1](https://github.com/antvis/g2/compare/5.3.0...5.3.1) (2025-04-21)
+
+
+### Bug Fixes
+
+* **docs:** fix a render error of char '|' ([#6785](https://github.com/antvis/g2/issues/6785)) ([04dade0](https://github.com/antvis/g2/commit/04dade096fe22cf338bdb859bdcf0c8edc285daa))
+* **label:** the labels in the treemap are blocking click interactions ([#6765](https://github.com/antvis/g2/issues/6765)) ([f99d0af](https://github.com/antvis/g2/commit/f99d0af45e889a5f155c5e6ffb8902f5d088108f))
+* tooltip pickup error when width is not equal ([#6738](https://github.com/antvis/g2/issues/6738)) ([1e73769](https://github.com/antvis/g2/commit/1e737697aa68baf4af6cb2b60f16bc2ba7d747e3))
+* tooltip with one element ([#6763](https://github.com/antvis/g2/issues/6763)) ([0318b9d](https://github.com/antvis/g2/commit/0318b9de57741b34d4a3528d601319d439152eac))
+
+
+### Features
+
+* site seo optimization ([#6759](https://github.com/antvis/g2/issues/6759)) ([8605e56](https://github.com/antvis/g2/commit/8605e56bed768bdf5904a86ec2d1933cd22e20ff))
+* tooltip support pointerdown, pointerup event ([#6789](https://github.com/antvis/g2/issues/6789)) ([9edb6a1](https://github.com/antvis/g2/commit/9edb6a1794cecb5c8b560394c4f61ca55b7921a7))
+
+
+### Reverts
+
+* tooltip logic to 5.2.12 ([#6776](https://github.com/antvis/g2/issues/6776)) ([e51c1ad](https://github.com/antvis/G2/commit/e51c1ad036f32704019056121e15cc4ec7376d94))
+
+
+
+# [5.3.0](https://github.com/antvis/g2/compare/v5.2.12...v5.3.0) (2025-04-10)
+
+
+### Bug Fixes
+
+* 修改scale后line颜色不刷新 ([#6655](https://github.com/antvis/g2/issues/6655)) ([e3938f0](https://github.com/antvis/g2/commit/e3938f07bac1cb2451bf949de97ceee5494ee638))
+* autofit render errror after legend filter ([#6723](https://github.com/antvis/g2/issues/6723)) ([9b7349a](https://github.com/antvis/g2/commit/9b7349a6f202fe7372a3a2c2bbf5cecec409087a))
+* display abnormally when seriesTooltip ([#6708](https://github.com/antvis/g2/issues/6708)) ([f271890](https://github.com/antvis/g2/commit/f2718909d8e45abf2c5cbe29f792f82fbc43120a))
+* element event error ([#6750](https://github.com/antvis/g2/issues/6750)) ([780870f](https://github.com/antvis/g2/commit/780870fec10ea12bf3a00c766fcc904583a11934))
+* handle the case where stepWidth is negative ([#6758](https://github.com/antvis/g2/issues/6758)) ([7737f97](https://github.com/antvis/g2/commit/7737f97e1b887a1c3cdb673a6f044906e737abd6))
+* tooltip marker blocked elements select ([#6695](https://github.com/antvis/g2/issues/6695)) ([e754054](https://github.com/antvis/g2/commit/e754054c3e299e4bf8710bb49ca33a2527eaad5c))
+* **tooltip:** handle single element case in series tooltip ([#6717](https://github.com/antvis/g2/issues/6717)) ([17c5c41](https://github.com/antvis/g2/commit/17c5c410b80b2583c9dfe4ee9a06a4587bb71f5a))
+* triangleDown render error ([#6697](https://github.com/antvis/g2/issues/6697)) ([5dd94a6](https://github.com/antvis/g2/commit/5dd94a6b11850dbb94eb40d5af4c4753f1338af8))
+* unit test errors ([#6722](https://github.com/antvis/g2/issues/6722)) ([0b944a5](https://github.com/antvis/g2/commit/0b944a55944887db95aa11e0c55426550e6cca6b))
+
+
+### Features
+
+* add oscp issue template ([#6662](https://github.com/antvis/g2/issues/6662)) ([fa3bec1](https://github.com/antvis/g2/commit/fa3bec12f2bd6e9e7a62281040599cb2292d37e2))
+* element select support custom region group ([#6724](https://github.com/antvis/g2/issues/6724)) ([84316ec](https://github.com/antvis/g2/commit/84316ecfcb6db7962e2199fe99585c4db3a443ee))
+* **scrollbar:** scrollbar docs update ([#6688](https://github.com/antvis/g2/issues/6688)) ([4796258](https://github.com/antvis/g2/commit/479625869cd5ec310aa190333ed5949b70757de3))
+* support expression string for function config ([#6709](https://github.com/antvis/g2/issues/6709)) ([e97f996](https://github.com/antvis/g2/commit/e97f99626d83997f86922bffc98d4fcbdf000dc7))
+* update announcement for doc season ([#6696](https://github.com/antvis/g2/issues/6696)) ([a4ef7cf](https://github.com/antvis/g2/commit/a4ef7cf482087698f93f3b837dac46c4d7872ceb))
+* update oscp issue template ([#6664](https://github.com/antvis/g2/issues/6664)) ([251c0a1](https://github.com/antvis/g2/commit/251c0a1f7712dd7f17780f836152f516c2eaf6b8))
+* update oscp issue template ([#6691](https://github.com/antvis/g2/issues/6691)) ([0c8586f](https://github.com/antvis/g2/commit/0c8586fb55f182e1ae91b41febdfdf63c3645038))
+* update oscp template ([#6713](https://github.com/antvis/g2/issues/6713)) ([44149ee](https://github.com/antvis/g2/commit/44149eeac03b4ef8a4789f51573a71f3a30ec52d))
+* update oscp template ([#6715](https://github.com/antvis/g2/issues/6715)) ([1d79b49](https://github.com/antvis/g2/commit/1d79b4969c6d2597d5d56ee473783e3bc3fa29c3))
+
+
+
+## [5.2.12](https://github.com/antvis/g2/compare/5.2.11...5.2.12) (2025-03-17)
+
+
+### Bug Fixes
+
+* **chart:** resolve issue [#6544](https://github.com/antvis/g2/issues/6544) with line chart sorting ([#6621](https://github.com/antvis/g2/issues/6621)) ([7000e20](https://github.com/antvis/g2/commit/7000e2082c690bab9c02d24add7b870e849cf299))
+* eliminate empty entries in word-cloud legend items ([#6614](https://github.com/antvis/g2/issues/6614)) ([7909a21](https://github.com/antvis/g2/commit/7909a21530443ce4be3a5e5ef6cb3438bd5e749c))
+* items callback's priority ([#6630](https://github.com/antvis/g2/issues/6630)) ([73daf22](https://github.com/antvis/g2/commit/73daf22d7789dabfe266aa3ef2d2e8ab260d3dd1))
+* overriding style.d causes custom rendering errors ([#6603](https://github.com/antvis/g2/issues/6603)) ([cbff5f0](https://github.com/antvis/g2/commit/cbff5f04dcecb41c6507349e48816a87ea683340))
+
+
+### Features
+
+* add action to update documentations to yuque ([#6627](https://github.com/antvis/g2/issues/6627)) ([086b39e](https://github.com/antvis/g2/commit/086b39e3a675e73433ccfae3f494f660874ec8e2))
+* add support for multi-select hotkeys ([#6628](https://github.com/antvis/g2/issues/6628)) ([f0c21a1](https://github.com/antvis/g2/commit/f0c21a161a34613efb1f0d27322320d5dc0a9d30))
+* **docs:** update docs, image、linX、lineY、link、liquid、polygon ([#6635](https://github.com/antvis/g2/issues/6635)) ([a9c9ce9](https://github.com/antvis/g2/commit/a9c9ce949a6eaae82b8725d3361a7b69b0527d08))
+
+
+
+## [5.2.11](https://github.com/antvis/g2/compare/5.2.10...5.2.11) (2025-02-11)
+
+
+### Bug Fixes
+
+*  g版本升级，supportsCSSTransform=true是默认设置 ([#6567](https://github.com/antvis/g2/issues/6567)) ([21efda5](https://github.com/antvis/g2/commit/21efda5572d207d9a9309417ace1acaee2ff2ead))
+* heatmap render error ([#6557](https://github.com/antvis/g2/issues/6557)) ([b9ca90b](https://github.com/antvis/g2/commit/b9ca90baa8a25d58bb1c25edd6f594ce44839b41))
+* overflowHide error in some case ([#6597](https://github.com/antvis/g2/issues/6597)) ([d67f6df](https://github.com/antvis/g2/commit/d67f6df64cc8a46ddcb01612951c8ed43aa1d50f))
+
+
+### Features
+
+* add helix coordinate and related examples/tests ([#6545](https://github.com/antvis/g2/issues/6545)) ([48dcd69](https://github.com/antvis/g2/commit/48dcd69b0dd832b69ea8907b5cc1b850a1fcf148))
+* add petercat ([#6579](https://github.com/antvis/g2/issues/6579)) ([8a310b7](https://github.com/antvis/g2/commit/8a310b71338712679cff192a1b955130a1460790)), closes [#6587](https://github.com/antvis/g2/issues/6587)
+* use @antv/vendor to replace d3 package ([#6594](https://github.com/antvis/g2/issues/6594)) ([dac27dd](https://github.com/antvis/g2/commit/dac27dd3c6cb5f4cd081322d417c9685921aa4b3))
+
+
+
+## [5.2.10](https://github.com/antvis/g2/compare/5.2.9...5.2.10) (2024-12-10)
+
+
+### Bug Fixes
+
+* site dev error & lodash ghost dependency ([#6543](https://github.com/antvis/g2/issues/6543)) ([71fd89d](https://github.com/antvis/g2/commit/71fd89dc4325ea81035cec656654b3c1932b8296))
+
+
+### Features
+
+* add tooltip data to tooltip event callback ([#6529](https://github.com/antvis/g2/issues/6529)) ([c04318f](https://github.com/antvis/g2/commit/c04318f6e4f2ea1064305ac44618b2087e297788))
+
+
+
+## [5.2.9](https://github.com/antvis/g2/compare/5.2.8...5.2.9) (2024-12-06)
+
+
+### Bug Fixes
+
+* **label:** correct label selector parameter handling and test case ([#6532](https://github.com/antvis/g2/issues/6532)) ([f8ce4ee](https://github.com/antvis/g2/commit/f8ce4ee574069fe1d36cd0b3cccb152a515af127))
+* remove unnecessary structure and update label attributes ([#6538](https://github.com/antvis/g2/issues/6538)) ([9d66375](https://github.com/antvis/g2/commit/9d66375cc42f99c2b35257f77d33938ee0cfaab8))
+
+
+### Features
+
+* **gauge:** add custom text tooltip support for gauge chart ([#6533](https://github.com/antvis/g2/issues/6533)) ([9e57dfe](https://github.com/antvis/g2/commit/9e57dfe520e98e6d3434df19184e0de02e683297))
+* **label:** implement label color inheritance from dependent elements ([#6536](https://github.com/antvis/g2/issues/6536)) ([56c0a3e](https://github.com/antvis/g2/commit/56c0a3ed9b3d5a7cfa17da04bb0851d3e4027c1b))
+* **transform:** add exponential smoothing data transform methods ([#6522](https://github.com/antvis/g2/issues/6522)) ([0ec584c](https://github.com/antvis/g2/commit/0ec584cd01332c6431147f759d2163d37831afc9))
+
+
+
+## [5.2.8](https://github.com/antvis/g2/compare/5.2.6...5.2.8) (2024-10-18)
+
+
+### Bug Fixes
+
+*  prevent label overlap in multiple charts ([#6490](https://github.com/antvis/g2/issues/6490)) ([6013d72](https://github.com/antvis/g2/commit/6013d72881276aca9d17d93908d33b21194979c6))
+* tooptip position offset in dodgeX ([#6483](https://github.com/antvis/g2/issues/6483)) ([df4920f](https://github.com/antvis/g2/commit/df4920f7305966b00a3ae252b11f7f7df94136d1))
+
+
+
 ## [5.2.7](https://github.com/antvis/g2/compare/5.2.6...5.2.7) (2024-10-08)
 
 

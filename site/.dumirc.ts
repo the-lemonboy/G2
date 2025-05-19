@@ -2,6 +2,9 @@ import { defineConfig } from 'dumi';
 import { repository, version } from '../package.json';
 
 export default defineConfig({
+  ...(process.env.NODE_ENV === 'production'
+    ? { ssr: { builder: 'webpack' }, mako: false }
+    : { ssr: false, mako: {} }),
   locales: [
     { id: 'zh', name: '中文' },
     { id: 'en', name: 'English' },
@@ -19,12 +22,23 @@ export default defineConfig({
     { name: 'description', content: '简洁的渐进式可视化语法。' },
   ],
   themeConfig: {
-    title: 'G2',
+    title: 'G2', // 网站 header 标题
+    metas: {
+      title: {
+        zh: 'G2 一套简明和渐进式的可视化语法',
+        en: 'G2 The Concise and Progressive Visualization Grammar',
+      },
+      description: {
+        zh: 'G2 是一套简洁的渐进式可视化语法，用于构建仪表盘、数据探索以及数据讲故事。结合工业和学术实践，实现图形语法、动画语法和交互语法。',
+        en: 'G2 is a concise and progressive visualization grammar designed for building dashboards, data exploration, and storytelling with data. It integrates both industry and academic practices to implement graphical grammar, animation grammar, and interaction grammar.',
+      },
+    },
     description: 'The Grammar of Visualization in JavaScript',
     defaultLanguage: 'zh', // 默认语言
     isAntVSite: false, // 是否是 AntV 的大官网
     footerTheme: 'light', // 白色 底部主题
     siteUrl: 'https://antv.antgroup.com/', // 官网首页地址
+    sitePackagePath: 'site', // 官网子包所在路径
     githubUrl: repository.url, // GitHub 地址
     showSearch: true, // 是否显示搜索框
     showGithubCorner: true, // 是否显示头部的 GitHub icon
@@ -36,6 +50,12 @@ export default defineConfig({
     showAPIDoc: false, // 是否在 demo 页展示API文档
     showSpecTab: true, // 是否展示 Spec 页面
     es5: false, // 案例代码是否编译到 es5
+    petercat: {
+      show: true, // 开启petercat辅助答疑机器人
+      token: '26c62f06-1155-4b2c-8f4b-aa443d4af2c6',
+    },
+    links: true, // 是否显示links研发小蜜
+    feedback: true, // 开启文档用户反馈
     versions: {
       // 历史版本以及切换下拉菜单
       [version]: 'https://g2.antv.antgroup.com',
@@ -50,20 +70,12 @@ export default defineConfig({
     navs: [
       // 头部的菜单列表
       {
-        slug: 'docs/manual/introduction',
+        slug: 'docs/manual/quick-start',
         title: {
           zh: '文档',
           en: 'Docs',
         },
         order: 3,
-      },
-      {
-        slug: 'docs/spec/overview',
-        title: {
-          zh: '选项',
-          en: 'Spec',
-        },
-        order: 2,
       },
       {
         slug: 'docs/api/overview',
@@ -114,7 +126,7 @@ export default defineConfig({
           zh: '简介',
           en: 'Introduction',
         },
-        order: 1,
+        order: 2,
       },
       {
         slug: 'manual/core',
@@ -122,7 +134,95 @@ export default defineConfig({
           zh: '核心概念',
           en: 'Core Concepts',
         },
+        order: 3,
+      },
+      {
+        slug: 'manual/core/chart',
+        title: {
+          zh: '图表（Chart）',
+          en: 'Chart',
+        },
+        order: 1,
+      },
+      {
+        slug: 'manual/core/mark',
+        title: {
+          zh: '标记（Mark）',
+          en: 'Mark',
+        },
         order: 2,
+      },
+      {
+        slug: 'manual/core/data',
+        title: {
+          zh: '数据（Data）',
+          en: 'Data',
+        },
+        order: 4,
+      },
+      {
+        slug: 'manual/core/scale',
+        title: {
+          zh: '比例尺（Scale）',
+          en: 'Scale',
+        },
+        order: 6,
+      },
+      {
+        slug: 'manual/core/transform',
+        title: {
+          zh: '转换（Transform）',
+          en: 'Transform',
+        },
+        order: 7,
+      },
+      {
+        slug: 'manual/core/coordinate',
+        title: {
+          zh: '坐标系（Coordinate）',
+          en: 'Coordinate',
+        },
+        order: 8,
+      },
+      {
+        slug: 'manual/core/animate',
+        title: {
+          zh: '动画（Animate）',
+          en: 'Animate',
+        },
+        order: 10,
+      },
+      {
+        slug: 'manual/core/interaction',
+        title: {
+          zh: '交互（Interaction）',
+          en: 'Interaction',
+        },
+        order: 13,
+      },
+      {
+        slug: 'manual/core/composition',
+        title: {
+          zh: '复合（Composition）',
+          en: 'Composition',
+        },
+        order: 14,
+      },
+      {
+        slug: 'manual/core/theme',
+        title: {
+          zh: '主题（Theme）',
+          en: 'Theme',
+        },
+        order: 15,
+      },
+      {
+        slug: 'manual/component',
+        title: {
+          zh: '图表组件',
+          en: 'Chart Component',
+        },
+        order: 4,
       },
       {
         slug: 'manual/extra-topics',
@@ -130,129 +230,47 @@ export default defineConfig({
           zh: '进阶主题',
           en: 'Extra Topics',
         },
-        order: 3,
-      },
-      // docs
-      {
-        slug: 'spec/data',
-        title: {
-          zh: '数据 - Data',
-          en: 'Data',
-        },
-        order: 3,
+        order: 5,
       },
       {
-        slug: 'spec/mark',
+        slug: 'manual/extra-topics/graph',
         title: {
-          zh: '图形 - Mark',
-          en: 'Mark',
-        },
-        order: 4,
-      },
-      {
-        slug: 'spec/transform',
-        title: {
-          zh: '变换 - Transform',
-          en: 'Transform',
+          zh: '关系图（Graph）',
+          en: 'Graph',
         },
         order: 5,
       },
       {
-        slug: 'spec/scale',
+        slug: 'manual/extra-topics/geo',
         title: {
-          zh: '比例尺 - Scale',
-          en: 'Scale',
-        },
-        order: 6,
-      },
-      {
-        slug: 'spec/coordinate',
-        title: {
-          zh: '坐标系 - Coordinate',
-          en: 'Coordinate',
-        },
-        order: 7,
-      },
-      {
-        slug: 'spec/composition',
-        title: {
-          zh: '复合 - Composition',
-          en: 'Composition',
-        },
-        order: 8,
-      },
-      {
-        slug: 'spec/component',
-        title: {
-          zh: '组件 - Component',
-          en: 'Component',
-        },
-        order: 9,
-      },
-      {
-        slug: 'spec/label',
-        title: {
-          zh: '数据标签 - Label',
-          en: 'Label',
-        },
-        order: 10,
-      },
-
-      {
-        slug: 'spec/animation',
-        title: {
-          zh: '动画 - Animation',
-          en: 'Animation',
-        },
-        order: 11,
-      },
-      {
-        slug: 'spec/interaction',
-        title: {
-          zh: '交互 - Interaction',
-          en: 'Interaction',
-        },
-        order: 12,
-      },
-      {
-        slug: 'spec/graph',
-        title: {
-          zh: '关系图 - Graph',
-          en: 'Graph',
-        },
-        order: 13,
-      },
-      {
-        slug: 'spec/geo',
-        title: {
-          zh: '地图 - Geo',
+          zh: '地图（Geo）',
           en: 'Geo',
         },
-        order: 14,
+        order: 5,
       },
       {
-        slug: 'spec/threed',
+        slug: 'manual/extra-topics/three-dimensional',
         title: {
-          zh: '3D 图表 - 3D Charts',
+          zh: '3D 图表（3D Chart）',
           en: '3D',
         },
-        order: 15,
+        order: 5,
       },
       {
-        slug: 'spec/theme',
+        slug: 'manual/extra-topics/plugin',
         title: {
-          zh: '主题 - Theme',
-          en: 'Theme',
-        },
-        order: 16,
-      },
-      {
-        slug: 'spec/plugin',
-        title: {
-          zh: '插件扩展 - Plugin',
+          zh: '插件扩展（Plugin）',
           en: 'Plugin',
         },
-        order: 17,
+        order: 5,
+      },
+      {
+        slug: 'manual/whats-new',
+        title: {
+          zh: '版本特性',
+          en: 'Whats New',
+        },
+        order: 5,
       },
     ],
     examples: [
@@ -329,6 +347,14 @@ export default defineConfig({
         icon: 'other',
       },
       {
+        slug: 'layout',
+        title: {
+          zh: '布局',
+          en: 'Layout',
+        },
+        icon: 'other',
+      },
+      {
         slug: 'intelligent',
         title: {
           zh: '智能可视化',
@@ -400,8 +426,17 @@ export default defineConfig({
         },
         icon: 'other',
       },
+      {
+        slug: 'expr',
+        title: {
+          zh: 'Spec 函数表达式 (beta)',
+          en: 'Spec Function Expression (beta)',
+        },
+        icon: 'other',
+      },
     ],
     playground: {
+      extraLib: '',
       devDependencies: {
         typescript: 'latest',
       },
@@ -422,9 +457,19 @@ export default defineConfig({
           </body>
         </html>`,
     },
+    /** 公告 */
     announcement: {
-      zh: '',
-      en: '',
+      title: {
+        zh: 'AntV OSCP 文档季火热进行中！成为 Issue Hunter，赢限定周边 & 超市卡等好礼 🎁',
+        en: 'AntV OSCP Doc Season: Hunt Issues to Win Exclusive Merch & Gift Cards! 🎁',
+      },
+      link: {
+        url: 'https://github.com/orgs/antvis/projects/31',
+        text: {
+          zh: '点击了解活动',
+          en: 'Learn More',
+        },
+      },
     },
     /** 首页技术栈介绍 */
     detail: {
@@ -453,7 +498,7 @@ export default defineConfig({
             zh: '开始使用',
             en: 'Getting Started',
           },
-          link: `/manual/introduction/getting-started`,
+          link: `/manual/quick-start`,
         },
         {
           text: {
@@ -554,6 +599,12 @@ export default defineConfig({
         img: 'https://gw.alipayobjects.com/mdn/rms_2274c3/afts/img/A*TgV-RZDODJIAAAAAAAAAAABkARQnAQ',
       },
     ],
+    /** 死链检查配置  */
+    deadLinkChecker: {
+      checkExternalLinks: false, // 是否检查外部链接
+    },
+    /** 站点地图配置 */
+    sitemap: {},
   },
   mfsu: false,
   analytics: {

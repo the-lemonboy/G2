@@ -1,8 +1,8 @@
 import { Vector2 } from '@antv/coord';
 import { DisplayObject, IAnimation as GAnimation, Rect } from '@antv/g';
 import { deepMix, upperFirst, isArray } from '@antv/util';
-import { group, groups } from 'd3-array';
-import { format } from 'd3-format';
+import { group, groups } from '@antv/vendor/d3-array';
+import { format } from '@antv/vendor/d3-format';
 import { mapObject } from '../utils/array';
 import { ChartEvent } from '../utils/event';
 import {
@@ -1078,7 +1078,7 @@ async function plotView(
                 maybeFacetElement(element, parent, origin);
                 const node = shapeFunction(data, index);
                 const animation = updateFunction(data, [element], [node]);
-                if (animation !== null) return animation;
+                if (animation?.length) return animation;
                 if (
                   element.nodeName === node.nodeName &&
                   node.nodeName !== 'g'
@@ -1197,7 +1197,9 @@ function plotLabel(
       return elements.flatMap((e) => {
         const L = getLabels(options, i, e);
         L.forEach((l) => {
-          labelShapeFunction.set(l, shapeFunction);
+          labelShapeFunction.set(l, (data) =>
+            shapeFunction({ ...data, element: e }),
+          );
           labelDescriptor.set(l, labelOption);
         });
         return L;
@@ -1364,11 +1366,18 @@ function createLabelShapeFunction(
       transform,
       style: abstractStyle,
       render,
+      selector,
+      element,
       ...abstractOptions
     } = options;
+
     const visualOptions = mapObject(
       { ...abstractOptions, ...abstractStyle } as Record<string, any>,
-      (d) => valueOf(d, datum, index, abstractData, { channel }),
+      (d) =>
+        valueOf(d, datum, index, abstractData, {
+          channel,
+          element,
+        }),
     );
     const { shape = defaultLabelShape, text, ...style } = visualOptions;
     const f = typeof formatter === 'string' ? format(formatter) : formatter;
@@ -1392,7 +1401,7 @@ function valueOf(
   datum: Record<string, any>,
   i: number,
   data: Record<string, any>,
-  options: { channel: Record<string, any> },
+  options: { channel: Record<string, any>; element?: G2Element },
 ) {
   if (typeof value === 'function') return value(datum, i, data, options);
   if (typeof value !== 'string') return value;
@@ -1622,8 +1631,13 @@ function createAnimationFunction(
     const animateFunction = useAnimation(options, context);
     const value = { delay, duration, easing };
     const A = animateFunction(from, to, deepMix(defaultEffectTiming, value));
-    if (!Array.isArray(A)) return [A];
-    return A;
+    let an: GAnimation[] = [];
+    if (!Array.isArray(A)) {
+      an = [A];
+    } else {
+      an = A;
+    }
+    return an.filter(Boolean);
   };
 }
 

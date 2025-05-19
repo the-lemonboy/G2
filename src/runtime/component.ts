@@ -3,8 +3,8 @@
  */
 import { Coordinate } from '@antv/coord';
 import { deepMix, isEqual } from '@antv/util';
-import { groups, max, sum } from 'd3-array';
-import { format } from 'd3-format';
+import { groups, max, sum } from '@antv/vendor/d3-array';
+import { format } from '@antv/vendor/d3-format';
 import { DisplayObject, Text } from '@antv/g';
 import {
   getPolarOptions,
@@ -439,12 +439,14 @@ function inferAxisPositionAndOrientation(
       scale.name.startsWith('position'),
     );
     const index = matchPosition(name);
-    if (name === positions.slice(-1)[0].name || index === null)
-      return [null, null];
+    if (index === null) return [null, null];
     // infer radar axis orientation
     const [startAngle, endAngle] = angleOf(coordinates);
+    const positionLength = isRadar(coordinates)
+      ? positions.length
+      : positions.length - 1;
     const angle =
-      ((endAngle - startAngle) / (positions.length - 1)) * index + startAngle;
+      ((endAngle - startAngle) / positionLength) * index + startAngle;
     return ['center', angle];
   }
 

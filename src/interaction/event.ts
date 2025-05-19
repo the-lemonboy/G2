@@ -1,19 +1,6 @@
 import { ChartEvent } from '../utils/event';
+import { dataOf } from '../utils/helper';
 import { maybeRoot } from './utils';
-
-export function dataOf(element, view) {
-  const { __data__: datum } = element;
-  const { markKey, index, seriesIndex } = datum;
-  const { markState } = view;
-  const selectedMark: any = Array.from(markState.keys()).find(
-    (mark) => (mark as any).key === markKey,
-  );
-  if (!selectedMark) return;
-  if (seriesIndex) {
-    return seriesIndex.map((i) => selectedMark.data[i]);
-  }
-  return selectedMark.data[index];
-}
 
 // For extended component
 function maybeComponentRoot(node) {

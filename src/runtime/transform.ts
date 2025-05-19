@@ -1,6 +1,6 @@
-import { Primitive } from 'd3-array';
+import { Primitive } from '@antv/vendor/d3-array';
 import { deepMix, isNumber } from '@antv/util';
-import { format } from 'd3-format';
+import { format } from '@antv/vendor/d3-format';
 import { indexOf, mapObject } from '../utils/array';
 import {
   composeAsync,
@@ -14,6 +14,8 @@ import { createColumnOf } from './mark';
 import { Data, DataComponent } from './types/data';
 import { G2Mark, G2DataOptions, G2Context } from './types/options';
 import { isPosition } from './scale';
+
+export const CALLBACK_ITEM_SYMBOL = Symbol('CALLBACK_ITEM');
 
 // @todo Add more defaults.
 export function applyDefaults(
@@ -192,7 +194,8 @@ export function extractTooltip(
       const values = [];
       for (const i of I) {
         const v = item(data[i], i, data, encode);
-        if (isStrictObject(v)) values[i] = v;
+        if (isStrictObject(v))
+          values[i] = { ...v, [CALLBACK_ITEM_SYMBOL]: true };
         else values[i] = { value: v };
       }
       return values;

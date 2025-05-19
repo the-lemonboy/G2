@@ -1,13 +1,13 @@
 import { Circle, DisplayObject, IElement, Line } from '@antv/g';
-import { sort, group, mean, bisector, minIndex } from 'd3-array';
+import { sort, group, mean, bisector, minIndex } from '@antv/vendor/d3-array';
 import { deepMix, lowerFirst, throttle } from '@antv/util';
 import { Tooltip as TooltipComponent } from '@antv/component';
-import { Constant, Band } from '@antv/scale';
-import { defined, subObject } from '../utils/helper';
+import { defined, groupNameOf, subObject, dataOf } from '../utils/helper';
 import { isTranspose, isPolar } from '../utils/coordinate';
 import { angle, sub, dist } from '../utils/vector';
 import { invert } from '../utils/scale';
 import { BBox } from '../runtime';
+import { CALLBACK_ITEM_SYMBOL } from '../runtime/transform';
 import {
   selectG2Elements,
   createXKey,
@@ -19,7 +19,6 @@ import {
   bboxOf,
   maybeRoot,
 } from './utils';
-import { dataOf } from './event';
 
 function getContainer(
   group: IElement,
@@ -208,39 +207,6 @@ function singleItem(element) {
   };
 }
 
-function groupNameOf(scale, datum) {
-  const { color: scaleColor, series: scaleSeries, facet = false } = scale;
-  const { color, series } = datum;
-  const invertAble = (scale) => {
-    return (
-      scale &&
-      scale.invert &&
-      !(scale instanceof Band) &&
-      !(scale instanceof Constant)
-    );
-  };
-  // For non constant color channel.
-  if (invertAble(scaleSeries)) {
-    const cloned = scaleSeries.clone();
-    return cloned.invert(series);
-  }
-  if (
-    series &&
-    scaleSeries instanceof Band &&
-    scaleSeries.invert(series) !== color &&
-    !facet
-  ) {
-    return scaleSeries.invert(series);
-  }
-  if (invertAble(scaleColor)) {
-    const name = scaleColor.invert(color);
-    // For threshold scale.
-    if (Array.isArray(name)) return null;
-    return name;
-  }
-  return null;
-}
-
 function itemColorOf(element) {
   const fill = element.getAttribute('fill');
   const stroke = element.getAttribute('stroke');
@@ -279,7 +245,12 @@ function groupItems(
       return definedItems.map(
         ({ color = itemColorOf(element) || theme.color, name, ...item }) => {
           const groupName = groupNameOf(scale, datum);
-          const name1 = useGroupName ? groupName || name : name || groupName;
+          // callback's priority is higher than groupName.
+          const name1 =
+            useGroupName && !(CALLBACK_ITEM_SYMBOL in item)
+              ? groupName || name
+              : name || groupName;
+
           return {
             ...item,
             color,
@@ -508,6 +479,8 @@ function updateMarker(root, { data, style, theme }) {
           r: 4,
           stroke,
           lineWidth: 2,
+          // Prevents blocking clicks on elements behind.
+          pointerEvents: 'none',
           ...style,
         },
       });
@@ -872,6 +845,7 @@ export function seriesTooltip(
         ...event,
         nativeEvent: true,
         data: {
+          ...tooltipData,
           data: { x: invert(scale.x, transformedX, true) },
         },
       });
@@ -920,6 +894,7 @@ export function seriesTooltip(
 
   const addEventListeners = () => {
     if (!disableNative) {
+      root.addEventListener('pointerdown', update);
       root.addEventListener('pointerenter', update);
       root.addEventListener('pointermove', update);
       // Only emit pointerleave event when the pointer is not in the root area.
@@ -927,14 +902,17 @@ export function seriesTooltip(
         if (mousePosition(root, e)) return;
         hide(e);
       });
+      root.addEventListener('pointerup', hide);
     }
   };
 
   const removeEventListeners = () => {
     if (!disableNative) {
+      root.removeEventListener('pointerdown', update);
       root.removeEventListener('pointerenter', update);
       root.removeEventListener('pointermove', update);
       root.removeEventListener('pointerleave', hide);
+      root.removeEventListener('pointerup', hide);
     }
   };
 
@@ -1095,6 +1073,7 @@ export function tooltip(
         ...event,
         nativeEvent: true,
         data: {
+          ...data,
           data: dataOf(element, view),
         },
       });
@@ -1109,17 +1088,21 @@ export function tooltip(
 
   const addEventListeners = () => {
     if (!disableNative) {
+      root.addEventListener('pointerdown', pointermove);
       root.addEventListener('pointermove', pointermove);
       // Only emit pointerleave event when the pointer is not in the root area.
       // !!!DO NOT USE pointerout event, it will emit when the pointer is in the child area.
       root.addEventListener('pointerleave', pointerleave);
+      root.addEventListener('pointerup', pointerleave);
     }
   };
 
   const removeEventListeners = () => {
     if (!disableNative) {
+      root.removeEventListener('pointerdown', pointermove);
       root.removeEventListener('pointermove', pointermove);
       root.removeEventListener('pointerleave', pointerleave);
+      root.removeEventListener('pointerup', pointerleave);
     }
   };
 

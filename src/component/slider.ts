@@ -1,5 +1,5 @@
 import { Slider as SliderComponent } from '@antv/component';
-import { format } from 'd3-format';
+import { format } from '@antv/vendor/d3-format';
 import { DisplayObject } from '@antv/g';
 import { isArray } from '@antv/util';
 import { isTranspose } from '../utils/coordinate';
@@ -11,6 +11,10 @@ import { invert } from '../utils/scale';
 
 export type SliderOptions = {
   orientation: 'horizontal' | 'vertical';
+  showHandle?: boolean;
+  showLabel?: boolean;
+  showLabelOnInteraction?: boolean;
+  autoFitLabel?: boolean;
   [key: string]: any;
 };
 
